@@ -20,7 +20,7 @@ from mt3 import inference
 from mt3 import layers
 from mt3 import metrics
 from mt3 import metrics_utils
-from mt3 import models
+# from mt3 import models
 from mt3 import network
 from mt3 import note_sequences
 from mt3 import preprocessors

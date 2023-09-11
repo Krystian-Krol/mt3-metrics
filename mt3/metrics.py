@@ -185,31 +185,33 @@ def transcription_metrics(
     frame_velocity_threshold: int = 30,
 ) -> Mapping[str, seqio.metrics.MetricValue]:
   """Compute mir_eval transcription metrics."""
-  if onsets_only and use_ties:
-    raise ValueError('Ties not compatible with onset-only transcription.')
-  if onsets_only:
-    encoding_spec = note_sequences.NoteOnsetEncodingSpec
-  elif not use_ties:
-    encoding_spec = note_sequences.NoteEncodingSpec
-  else:
-    encoding_spec = note_sequences.NoteEncodingWithTiesSpec
+  # if onsets_only and use_ties:
+  #   raise ValueError('Ties not compatible with onset-only transcription.')
+  # if onsets_only:
+  #   encoding_spec = note_sequences.NoteOnsetEncodingSpec
+  # elif not use_ties:
+  #   encoding_spec = note_sequences.NoteEncodingSpec
+  # else:
+  #   encoding_spec = note_sequences.NoteEncodingWithTiesSpec
 
   # The first target for each full example contains the NoteSequence; just
   # organize by ID.
-  full_targets = {}
-  for target in targets:
-    if target['ref_ns']:
-      full_targets[target['unique_id']] = {'ref_ns': target['ref_ns']}
+  # full_targets = {}
+  # for target in targets:
+  #   if target['ref_ns']:
+  #     full_targets[target['unique_id']] = {'ref_ns': target['ref_ns']}
 
   # Gather all predictions for the same ID and concatenate them in time order,
   # to construct full-length predictions.
-  full_predictions = metrics_utils.combine_predictions_by_id(
-      predictions=predictions,
-      combine_predictions_fn=functools.partial(
-          metrics_utils.event_predictions_to_ns,
-          codec=codec,
-          encoding_spec=encoding_spec))
+  # full_predictions = metrics_utils.combine_predictions_by_id(
+  #     predictions=predictions,
+  #     combine_predictions_fn=functools.partial(
+  #         metrics_utils.event_predictions_to_ns,
+  #         codec=codec,
+  #         encoding_spec=encoding_spec))
 
+  full_targets = targets
+  full_predictions = predictions
   assert sorted(full_targets.keys()) == sorted(full_predictions.keys())
 
   full_target_prediction_pairs = [
@@ -220,8 +222,8 @@ def transcription_metrics(
   scores = collections.defaultdict(list)
   all_track_pianorolls = collections.defaultdict(list)
   for target, prediction in full_target_prediction_pairs:
-    scores['Invalid events'].append(prediction['est_invalid_events'])
-    scores['Dropped events'].append(prediction['est_dropped_events'])
+  #   scores['Invalid events'].append(prediction['est_invalid_events'])
+  #   scores['Dropped events'].append(prediction['est_dropped_events'])
 
     def remove_drums(ns):
       ns_drumless = note_seq.NoteSequence()
@@ -359,34 +361,34 @@ def transcription_metrics(
                       for k, v in scores.items()}
 
   # Pick several examples to summarize.
-  targets_to_summarize, predictions_to_summarize = zip(
-      *full_target_prediction_pairs[:num_summary_examples])
+  # targets_to_summarize, predictions_to_summarize = zip(
+  #     *full_target_prediction_pairs[:num_summary_examples])
 
   # Compute audio summaries.
-  audio_summaries = summaries.audio_summaries(
-      targets=targets_to_summarize,
-      predictions=predictions_to_summarize,
-      spectrogram_config=spectrogram_config)
+  # audio_summaries = summaries.audio_summaries(
+  #     targets=targets_to_summarize,
+  #     predictions=predictions_to_summarize,
+  #     spectrogram_config=spectrogram_config)
 
   # Compute transcription summaries.
-  transcription_summaries = summaries.transcription_summaries(
-      targets=targets_to_summarize,
-      predictions=predictions_to_summarize,
-      spectrogram_config=spectrogram_config,
-      ns_feature_suffix='ns',
-      track_specs=track_specs)
+  # transcription_summaries = summaries.transcription_summaries(
+  #     targets=targets_to_summarize,
+  #     predictions=predictions_to_summarize,
+  #     spectrogram_config=spectrogram_config,
+  #     ns_feature_suffix='ns',
+  #     track_specs=track_specs)
 
-  pianorolls_to_summarize = {
-      k: v[:num_summary_examples] for k, v in all_track_pianorolls.items()
-  }
-
-  prettymidi_pianoroll_summaries = summaries.prettymidi_pianoroll(
-      pianorolls_to_summarize, fps=frame_fps)
+  # pianorolls_to_summarize = {
+  #     k: v[:num_summary_examples] for k, v in all_track_pianorolls.items()
+  # }
+  #
+  # prettymidi_pianoroll_summaries = summaries.prettymidi_pianoroll(
+  #     pianorolls_to_summarize, fps=frame_fps)
 
   return {
       **mean_scores,
       **score_histograms,
-      **audio_summaries,
-      **transcription_summaries,
-      **prettymidi_pianoroll_summaries,
+      # **audio_summaries,
+      # **transcription_summaries,
+      # **prettymidi_pianoroll_summaries,
   }
